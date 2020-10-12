@@ -2,13 +2,13 @@ package me.border.jpotify.audio;
 
 import javafx.scene.media.MediaPlayer;
 
-import java.io.File;
 import java.util.*;
 
 public class Player {
 
-    private List<Song> songs = new ArrayList<>();
-    private Map<String, Integer> indexMap = new HashMap<>();
+    private Playlist playlist;
+    private List<Song> songs;
+    private Map<String, Integer> indexMap;
 
     private Random random = new Random();
     private Song currentSong;
@@ -19,22 +19,20 @@ public class Player {
 
     private Mode mode;
 
-    public Player(File dir){
-        File[] children = dir.listFiles();
-        if (children == null){
-            return;
-        }
-        int index = 0;
-        for (File file : children){
-            if (file.getName().endsWith(".mp3")) {
-                Song song = new Song(file);
-                songs.add(song);
-                indexMap.put(song.getName(), index);
-                index++;
-            } else {
-                System.out.println("Ignoring file " + file.getName() + " since it is not mp3.");
-            }
-        }
+    private double volume = -1;
+
+    public Player(){ }
+
+    public Player(Playlist playlist){
+        this.playlist = playlist;
+        this.songs = playlist.getSongs();
+        this.indexMap = playlist.getIndexMap();
+    }
+
+    public void setPlaylist(Playlist playlist){
+        this.playlist = playlist;
+        this.songs = playlist.getSongs();
+        this.indexMap = playlist.getIndexMap();
     }
 
     public void playNormal(){
@@ -67,7 +65,6 @@ public class Player {
 
         playSong(song);
     }
-
 
     public void playNext(){
         int index = songs.indexOf(currentSong);
@@ -108,6 +105,10 @@ public class Player {
         this.currentSong = song;
 
         MediaPlayer mediaPlayer = song.getMedia();
+
+        if (this.volume != -1)
+            mediaPlayer.setVolume(this.volume);
+
         mediaPlayer.play();
         mediaPlayer.setOnEndOfMedia(() -> {
             switch (mode) {
@@ -119,5 +120,9 @@ public class Player {
                     break;
             }
         });
+    }
+
+    public void setVolume(double volume){
+        this.volume = volume;
     }
 }
