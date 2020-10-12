@@ -68,10 +68,13 @@ public class Player {
 
     public void playNext(){
         int index = songs.indexOf(currentSong);
-        Song nextSong = songs.get(index+1);
-        if (nextSong == null){
+        Song nextSong;
+        try {
+             nextSong = songs.get(index + 1);
+        } catch (IndexOutOfBoundsException ex) {
             nextSong = songs.get(0);
         }
+
 
         playSong(nextSong);
     }
@@ -106,9 +109,13 @@ public class Player {
 
         MediaPlayer mediaPlayer = song.getMedia();
 
-        if (this.volume != -1)
-            mediaPlayer.setVolume(this.volume);
+        if (this.volume == -1) {
+            volume = mediaPlayer.getVolume();
+        } else {
+            mediaPlayer.setVolume(volume);
+        }
 
+        playing = true;
         mediaPlayer.play();
         mediaPlayer.setOnEndOfMedia(() -> {
             switch (mode) {
@@ -122,7 +129,12 @@ public class Player {
         });
     }
 
+    public double getVolume(){
+        return volume;
+    }
+
     public void setVolume(double volume){
         this.volume = volume;
+        this.currentSong.getMedia().setVolume(volume);
     }
 }

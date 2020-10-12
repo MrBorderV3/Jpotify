@@ -6,6 +6,8 @@ import me.border.utilities.file.watcher.FileListener;
 import me.border.utilities.file.watcher.FileWatcher;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -41,6 +43,7 @@ public class Playlist {
     }
 
     public void refreshPlaylistIndex(){
+        index = 0;
         indexMap.clear();
         for (Song song : songs){
             int sIndex = songs.indexOf(song);
@@ -59,6 +62,10 @@ public class Playlist {
 
     public List<Song> getSongs(){
         return songs;
+    }
+
+    public File getDir(){
+        return dir;
     }
 
     private void initWatchService(){

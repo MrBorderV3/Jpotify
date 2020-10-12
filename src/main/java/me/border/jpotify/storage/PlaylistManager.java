@@ -8,17 +8,35 @@ import java.util.Map;
 
 public class PlaylistManager {
 
-    private static final File dir = new File(System.getProperty("user.home") + File.separator + "Jpotify");
+    private final File dir = new File(System.getProperty("user.home") + File.separator + "Jpotify");
 
-    private static Map<String, Playlist> playlists = new HashMap<>();
+    private Map<String, Playlist> playlists = new HashMap<>();
 
-    public static Playlist getPlaylist(String name) {
-        handleDir();
+    public PlaylistManager(){
+        if (!dir.exists())
+            dir.mkdirs();
+        loadPlaylists();
+    }
+
+    private void loadPlaylists(){
+        for (File playlistDir : dir.listFiles()){
+            if (playlistDir != null){
+                if (playlistDir.isDirectory()){
+                    Playlist playlist = new Playlist(playlistDir);
+                    playlists.put(playlist.getName(), playlist);
+                }
+            }
+        }
+    }
+
+    public Playlist getPlaylist(String name) {
         return playlists.get(name);
     }
 
-    public static void createPlaylist(String name) {
-        handleDir();
+    public void createPlaylist(String name) {
+        if (playlists.containsKey(name)){
+            return;
+        }
         File playlistDir = new File(dir + File.separator + name);
         if (!playlistDir.exists()){
             playlistDir.mkdirs();
@@ -28,13 +46,7 @@ public class PlaylistManager {
         playlists.put(name, playlist);
     }
 
-    public static void removePlaylist(Playlist playlist){
+    public void removePlaylist(Playlist playlist){
         playlists.remove(playlist.getName());
     }
-
-    private static void handleDir() {
-        if (!dir.exists())
-            dir.mkdirs();
-    }
-
 }
