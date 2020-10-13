@@ -6,9 +6,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Slider;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.media.MediaPlayer;
-import javafx.util.Duration;
-import me.border.jpotify.audio.AudioController;
+import me.border.jpotify.audio.util.AudioController;
 import me.border.jpotify.audio.Player;
 import me.border.jpotify.audio.Playlist;
 

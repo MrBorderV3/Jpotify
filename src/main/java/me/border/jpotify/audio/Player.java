@@ -3,6 +3,8 @@ package me.border.jpotify.audio;
 import javafx.application.Platform;
 import javafx.scene.media.MediaPlayer;
 import javafx.util.Duration;
+import me.border.jpotify.audio.util.History;
+import me.border.jpotify.audio.util.Mode;
 import me.border.jpotify.file.PlaylistCacheFile;
 import me.border.jpotify.storage.PlaylistManager;
 import me.border.jpotify.ui.PlayerApp;
@@ -19,11 +21,12 @@ public class Player {
 
     private Random random = new Random();
     private Song currentSong;
-    private Song lastSong;
+    private History history = new History();
 
     private boolean firstSong = true;
     private boolean playing = false;
 
+    // TODO - Change it so playing on shuffle just shuffles the list of songs (maybe add shuffle function to Playlist and save an oglist and a shuffledlist) GOT TO KEEP COPY OF OG ORDER
     private Mode mode;
 
     private double volume = -1;
@@ -53,6 +56,7 @@ public class Player {
         this.playlist = playlist;
         this.songs = playlist.getSongs();
         this.indexMap = playlist.getIndexMap();
+        history.reset();
         firstSong = true;
         String item = playlist.getName();
         if (currentSong != null && songs.contains(currentSong)){
@@ -115,7 +119,10 @@ public class Player {
     }
 
     public void playLastSong(){
-        Song lastSong = this.lastSong;
+        Song lastSong = history.poll();
+        if (lastSong == null){
+            return;
+        }
 
         playSong(lastSong);
     }
@@ -140,7 +147,7 @@ public class Player {
 
     private void playSong(Song song){
         if (!this.firstSong){
-            this.lastSong = currentSong;
+            history.add(currentSong);
         } else {
             this.firstSong = false;
         }

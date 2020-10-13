@@ -1,4 +1,4 @@
-package me.border.jpotify.audio;
+package me.border.jpotify.audio.util;
 
 import javafx.beans.InvalidationListener;
 import javafx.scene.control.Slider;

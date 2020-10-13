@@ -3,6 +3,7 @@ package me.border.jpotify.audio;
 import javafx.embed.swing.JFXPanel;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
+import me.border.jpotify.audio.util.AudioController;
 import me.border.jpotify.util.Utils;
 
 import java.io.File;
