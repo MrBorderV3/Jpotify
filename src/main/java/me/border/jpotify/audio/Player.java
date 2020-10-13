@@ -3,7 +3,7 @@ package me.border.jpotify.audio;
 import javafx.application.Platform;
 import javafx.scene.media.MediaPlayer;
 import javafx.util.Duration;
-import me.border.jpotify.audio.util.History;
+import me.border.jpotify.audio.util.SongQueue;
 import me.border.jpotify.audio.util.Mode;
 import me.border.jpotify.file.PlaylistCacheFile;
 import me.border.jpotify.storage.PlaylistManager;
@@ -21,7 +21,7 @@ public class Player {
 
     private Random random = new Random();
     private Song currentSong;
-    private History history = new History();
+    private SongQueue songQueue = new SongQueue();
 
     private boolean firstSong = true;
     private boolean playing = false;
@@ -56,7 +56,7 @@ public class Player {
         this.playlist = playlist;
         this.songs = playlist.getSongs();
         this.indexMap = playlist.getIndexMap();
-        history.reset();
+        songQueue.clear();
         firstSong = true;
         String item = playlist.getName();
         if (currentSong != null && songs.contains(currentSong)){
@@ -119,7 +119,7 @@ public class Player {
     }
 
     public void playLastSong(){
-        Song lastSong = history.poll();
+        Song lastSong = songQueue.poll();
         if (lastSong == null){
             return;
         }
@@ -147,7 +147,7 @@ public class Player {
 
     private void playSong(Song song){
         if (!this.firstSong){
-            history.add(currentSong);
+            songQueue.add(currentSong);
         } else {
             this.firstSong = false;
         }
