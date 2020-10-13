@@ -43,7 +43,9 @@ public class Player {
                 Playlist playlist = PlayerApp.playlistManager.getPlaylist(cachedPlaylist);
                 setPlaylist(playlist);
                 PlayerApp.controller.focusPlaylist(playlist.getName());
-                Platform.runLater(() -> playSpecific(song));
+                if (playlist.hasSong(song)) {
+                    Platform.runLater(() -> playSpecific(song));
+                }
             } else {
                 Playlist playlist = PlayerApp.playlistManager.getPlaylist(cache);
                 setPlaylist(playlist);
@@ -106,6 +108,9 @@ public class Player {
     }
 
     public void playNext(){
+        if (currentSong == null) {
+            return;
+        }
         int index = songs.indexOf(currentSong);
         Song nextSong;
         try {
@@ -114,14 +119,22 @@ public class Player {
             nextSong = songs.get(0);
         }
 
-
         playSong(nextSong);
     }
 
-    public void playLastSong(){
+    public void playLastSong() {
         Song lastSong = songQueue.poll();
-        if (lastSong == null){
-            return;
+        if (lastSong == null) {
+            if (currentSong == null) {
+                return;
+            }
+
+            int index = songs.indexOf(currentSong);
+            try {
+                lastSong = songs.get(index - 1);
+            } catch (IndexOutOfBoundsException ex) {
+                lastSong = songs.get(0);
+            }
         }
 
         playSong(lastSong);
@@ -146,6 +159,9 @@ public class Player {
     }
 
     private void playSong(Song song){
+        if (playing) {
+            pause();
+        }
         if (!this.firstSong){
             songQueue.add(currentSong);
         } else {

@@ -44,7 +44,17 @@ public class AppController {
 
     @FXML
     public void pause(){
-        playerRef.get().pause();
+        player().pause();
+    }
+
+    @FXML
+    public void prev(){
+        player().playLastSong();
+    }
+
+    @FXML
+    public void next(){
+        player().playNext();
     }
 
     @FXML
@@ -104,16 +114,6 @@ public class AppController {
             value = value + 30.0;
         }
     }
-
-    /*private void updateValues() {
-        MediaPlayer mp = player().getCurrentSong().getMedia();
-        Duration currentTime = mp.getCurrentTime();
-        Duration duration = mp.getMedia().getDuration();
-        timeSlider.setDisable(duration.isUnknown());
-        if (!timeSlider.isDisabled() && duration.greaterThan(Duration.ZERO) && !timeSlider.isValueChanging()) {
-            timeSlider.setValue(currentTime.divide(duration).toMillis() * 100.0);
-        }
-    }*/
 
     public Player player(){
         return playerRef.get();

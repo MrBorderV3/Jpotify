@@ -1,17 +1,13 @@
 package me.border.jpotify.audio;
 
+import javafx.scene.media.MediaPlayer;
 import me.border.jpotify.util.Utils;
 import me.border.utilities.file.watcher.FileEvent;
 import me.border.utilities.file.watcher.FileListener;
 import me.border.utilities.file.watcher.FileWatcher;
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class Playlist {
 
@@ -52,6 +48,10 @@ public class Playlist {
         }
     }
 
+    public boolean hasSong(String song){
+        return indexMap.containsKey(song);
+    }
+
     public String getName(){
         return name;
     }
@@ -73,15 +73,21 @@ public class Playlist {
         watcher.addListener(new FileListener() {
             @Override
             public void onCreated(FileEvent event) {
-                File file = event.getFile();
-                if (file.getName().endsWith(".mp3") || file.getName().endsWith(".m4a")) {
-                    Song song = new Song(file);
-                    songs.add(song);
-                    indexMap.put(song.getName(), index);
-                    index++;
-                } else {
-                    System.out.println("Ignoring file " + file.getName() + " since it is not mp3.");
-                }
+                Timer timer = new Timer();
+                timer.schedule(new TimerTask() {
+                    @Override
+                    public void run() {
+                        File file = event.getFile();
+                        if (file.getName().endsWith(".mp3") || file.getName().endsWith(".m4a")) {
+                            Song song = new Song(file);
+                            songs.add(song);
+                            indexMap.put(song.getName(), index);
+                            index++;
+                        } else {
+                            System.out.println("Ignoring file " + file.getName() + " since it is not audio.");
+                        }
+                    }
+                }, 500L);
             }
 
             @Override
@@ -92,13 +98,13 @@ public class Playlist {
             @Override
             public void onDeleted(FileEvent event) {
                 File file = event.getFile();
-                if (file.getName().endsWith(".mp3")) {
+                if (file.getName().endsWith(".mp3") || file.getName().endsWith(".m4a")) {
                     String name = Utils.stripExtension(file.getName());
                     int index = indexMap.get(name);
                     songs.remove(index);
                     refreshPlaylistIndex();
                 } else {
-                    System.out.println("Ignoring file " + file.getName() + " since it is not mp3.");
+                    System.out.println("Ignoring file " + file.getName() + " since it is not audio.");
                 }
             }
         });

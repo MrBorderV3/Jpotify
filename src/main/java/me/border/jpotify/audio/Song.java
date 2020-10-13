@@ -34,4 +34,9 @@ public class Song {
     public MediaPlayer getMedia(){
         return media;
     }
+
+    @Override
+    public String toString() {
+        return "Song{" + "name='" + name + '\'' + '}';
+    }
 }
