@@ -1,12 +1,19 @@
 package me.border.jpotify.audio;
 
+import javafx.application.Platform;
 import javafx.scene.media.MediaPlayer;
+import javafx.util.Duration;
+import me.border.jpotify.file.PlaylistCacheFile;
+import me.border.jpotify.storage.PlaylistManager;
+import me.border.jpotify.ui.PlayerApp;
+import me.border.jpotify.ui.controllers.AppController;
 
 import java.util.*;
 
 public class Player {
 
     private Playlist playlist;
+    private PlaylistCacheFile playlistCacheFile;
     private List<Song> songs;
     private Map<String, Integer> indexMap;
 
@@ -21,18 +28,42 @@ public class Player {
 
     private double volume = -1;
 
-    public Player(){ }
-
-    public Player(Playlist playlist){
-        this.playlist = playlist;
-        this.songs = playlist.getSongs();
-        this.indexMap = playlist.getIndexMap();
+    public Player(){
+        this.playlistCacheFile = new PlaylistCacheFile("pcache", PlaylistManager.dir, null);
+        this.playlistCacheFile.setup();
+        String cache = playlistCacheFile.getItem();
+        if (cache != null){
+            if (cache.contains("?:?")){
+                String[] rCache = cache.split("\\?:\\?");
+                String cachedPlaylist = rCache[0];
+                String song = rCache[1];
+                Playlist playlist = PlayerApp.playlistManager.getPlaylist(cachedPlaylist);
+                setPlaylist(playlist);
+                PlayerApp.controller.focusPlaylist(playlist.getName());
+                Platform.runLater(() -> playSpecific(song));
+            } else {
+                Playlist playlist = PlayerApp.playlistManager.getPlaylist(cache);
+                setPlaylist(playlist);
+                PlayerApp.controller.focusPlaylist(playlist.getName());
+            }
+        }
     }
 
-    public void setPlaylist(Playlist playlist){
+    public void setPlaylist(Playlist playlist) {
         this.playlist = playlist;
         this.songs = playlist.getSongs();
         this.indexMap = playlist.getIndexMap();
+        firstSong = true;
+        String item = playlist.getName();
+        if (currentSong != null && songs.contains(currentSong)){
+            item = item + "?:?" + currentSong.getName();
+        }
+        this.playlistCacheFile.setItem(item);
+        this.playlistCacheFile.save();
+    }
+
+    public Playlist getPlaylist(){
+        return playlist;
     }
 
     public void playNormal(){
@@ -41,6 +72,10 @@ public class Player {
         }
 
         if (firstSong) {
+            if (songs.isEmpty()){
+                playing = false;
+                return;
+            }
             Song song = songs.get(0);
             playSong(song);
         } else {
@@ -70,7 +105,7 @@ public class Player {
         int index = songs.indexOf(currentSong);
         Song nextSong;
         try {
-             nextSong = songs.get(index + 1);
+            nextSong = songs.get(index + 1);
         } catch (IndexOutOfBoundsException ex) {
             nextSong = songs.get(0);
         }
@@ -95,8 +130,12 @@ public class Player {
     public void resume(){
         if (playing)
             return;
-        playing = true;
-        currentSong.getMedia().play();
+        if (firstSong){
+            playNormal();
+        } else {
+            playing = true;
+            currentSong.getMedia().play();
+        }
     }
 
     private void playSong(Song song){
@@ -108,6 +147,7 @@ public class Player {
         this.currentSong = song;
 
         MediaPlayer mediaPlayer = song.getMedia();
+        mediaPlayer.seek(Duration.ZERO);
 
         if (this.volume == -1) {
             volume = mediaPlayer.getVolume();
@@ -116,8 +156,17 @@ public class Player {
         }
 
         playing = true;
+        controller().initTimeListener();
         mediaPlayer.play();
+
+        String item = playlist.getName();
+        if (currentSong != null){
+            item = item + "?:?" + currentSong.getName();
+        }
+        this.playlistCacheFile.setItem(item);
+        this.playlistCacheFile.save();
         mediaPlayer.setOnEndOfMedia(() -> {
+            controller().resetSlider();
             switch (mode) {
                 case SHUFFLE:
                     shufflePlay();
@@ -129,6 +178,10 @@ public class Player {
         });
     }
 
+    public Song getCurrentSong(){
+        return currentSong;
+    }
+
     public double getVolume(){
         return volume;
     }
@@ -136,5 +189,9 @@ public class Player {
     public void setVolume(double volume){
         this.volume = volume;
         this.currentSong.getMedia().setVolume(volume);
+    }
+
+    public AppController controller(){
+        return PlayerApp.controller;
     }
 }

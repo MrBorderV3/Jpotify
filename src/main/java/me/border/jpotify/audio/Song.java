@@ -10,6 +10,7 @@ import java.io.File;
 public class Song {
 
     private MediaPlayer media;
+    private AudioController controller;
     private String name;
 
     public Song(File mp3File){
@@ -18,10 +19,15 @@ public class Song {
         Media media = new Media(mp3File.toURI().toString());
         this.media = new MediaPlayer(media);
         this.name = Utils.stripExtension(mp3File.getName());
+        this.controller = new AudioController(this.media);
     }
 
     public String getName(){
         return name;
+    }
+
+    public AudioController getController(){
+        return controller;
     }
 
     public MediaPlayer getMedia(){

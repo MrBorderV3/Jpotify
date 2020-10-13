@@ -30,7 +30,7 @@ public class Playlist {
             return;
         }
         for (File file : children){
-            if (file.getName().endsWith(".mp3")) {
+            if (file.getName().endsWith(".mp3") || file.getName().endsWith(".m4a")) {
                 Song song = new Song(file);
                 songs.add(song);
                 indexMap.put(song.getName(), index);
@@ -74,7 +74,7 @@ public class Playlist {
             @Override
             public void onCreated(FileEvent event) {
                 File file = event.getFile();
-                if (file.getName().endsWith(".mp3")) {
+                if (file.getName().endsWith(".mp3") || file.getName().endsWith(".m4a")) {
                     Song song = new Song(file);
                     songs.add(song);
                     indexMap.put(song.getName(), index);

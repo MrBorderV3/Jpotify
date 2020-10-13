@@ -3,12 +3,13 @@ package me.border.jpotify.storage;
 import me.border.jpotify.audio.Playlist;
 
 import java.io.File;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
 public class PlaylistManager {
 
-    private final File dir = new File(System.getProperty("user.home") + File.separator + "Jpotify");
+    public static final File dir = new File(System.getProperty("user.home") + File.separator + "Jpotify");
 
     private Map<String, Playlist> playlists = new HashMap<>();
 
@@ -31,6 +32,10 @@ public class PlaylistManager {
 
     public Playlist getPlaylist(String name) {
         return playlists.get(name);
+    }
+
+    public Collection<Playlist> getPlaylists(){
+        return playlists.values();
     }
 
     public void createPlaylist(String name) {
