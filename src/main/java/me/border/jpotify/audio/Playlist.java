@@ -1,6 +1,5 @@
 package me.border.jpotify.audio;
 
-import javafx.scene.media.MediaPlayer;
 import me.border.jpotify.util.Utils;
 import me.border.utilities.file.watcher.FileEvent;
 import me.border.utilities.file.watcher.FileListener;

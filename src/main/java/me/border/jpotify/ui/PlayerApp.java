@@ -37,9 +37,7 @@ public class PlayerApp extends Application {
         player = new Player();
         controller.initController(player);
 
-
-        //YTConverter.addSong("https://www.youtube.com/watch?v=-ZKIdJJY9lM&ab_channel=Vitalogy", playlistManager.getPlaylist("myPlaylist2"));
-
         stage.show();
+        controller.focus();
     }
 }

@@ -1,6 +1,5 @@
 package me.border.jpotify.audio;
 
-import javafx.application.Platform;
 import javafx.scene.media.MediaPlayer;
 import javafx.util.Duration;
 import me.border.jpotify.audio.util.SongQueue;
@@ -35,6 +34,7 @@ public class Player {
         this.playlistCacheFile = new PlaylistCacheFile("pcache", PlaylistManager.dir, null);
         this.playlistCacheFile.setup();
         String cache = playlistCacheFile.getItem();
+        controller().adjustButton(false);
         if (cache != null){
             if (cache.contains("?:?")){
                 String[] rCache = cache.split("\\?:\\?");
@@ -44,7 +44,8 @@ public class Player {
                 setPlaylist(playlist);
                 PlayerApp.controller.focusPlaylist(playlist.getName());
                 if (playlist.hasSong(song)) {
-                    Platform.runLater(() -> playSpecific(song));
+                    this.firstSong = false;
+                    currentSong = songs.get(indexMap.get(song));
                 }
             } else {
                 Playlist playlist = PlayerApp.playlistManager.getPlaylist(cache);
@@ -83,7 +84,7 @@ public class Player {
                 return;
             }
             Song song = songs.get(0);
-            playSong(song);
+            playSong(song, false);
         } else {
             playNext();
         }
@@ -93,7 +94,12 @@ public class Player {
         if (this.mode != Mode.SHUFFLE) {
             this.mode = Mode.SHUFFLE;
         }
-        playSong(songs.get(random.nextInt(songs.size())));
+
+        Song randomSong = songs.get(random.nextInt(songs.size()));
+        while (randomSong == currentSong){
+            randomSong = songs.get(random.nextInt(songs.size()));;
+        }
+        playSong(randomSong, false);
     }
 
     // Function to play a song that is clicked
@@ -104,7 +110,7 @@ public class Player {
         int index = indexMap.get(name);
         Song song = songs.get(index);
 
-        playSong(song);
+        playSong(song, false);
     }
 
     public void playNext(){
@@ -119,7 +125,7 @@ public class Player {
             nextSong = songs.get(0);
         }
 
-        playSong(nextSong);
+        playSong(nextSong, false);
     }
 
     public void playLastSong() {
@@ -137,7 +143,7 @@ public class Player {
             }
         }
 
-        playSong(lastSong);
+        playSong(lastSong, true);
     }
 
     public void pause() {
@@ -154,15 +160,16 @@ public class Player {
             playNormal();
         } else {
             playing = true;
+            controller().changeText(currentSong.getName());
             currentSong.getMedia().play();
         }
     }
 
-    private void playSong(Song song){
+    private void playSong(Song song, boolean prev){
         if (playing) {
             pause();
         }
-        if (!this.firstSong){
+        if (!this.firstSong && !prev){
             songQueue.add(currentSong);
         } else {
             this.firstSong = false;
@@ -180,6 +187,7 @@ public class Player {
 
         playing = true;
         controller().initTimeListener();
+        controller().changeText(song.getName());
         mediaPlayer.play();
 
         String item = playlist.getName();
@@ -212,6 +220,10 @@ public class Player {
     public void setVolume(double volume){
         this.volume = volume;
         this.currentSong.getMedia().setVolume(volume);
+    }
+
+    public boolean isPlaying(){
+        return playing;
     }
 
     public AppController controller(){
