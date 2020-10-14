@@ -1,11 +1,11 @@
 package me.border.jpotify.ui.controllers;
 
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.Cursor;
 import javafx.scene.Scene;
 import javafx.scene.control.Slider;
 import javafx.scene.control.ToggleButton;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.AnchorPane;
@@ -17,7 +17,6 @@ import me.border.jpotify.audio.Playlist;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class AppController {
@@ -44,11 +43,13 @@ public class AppController {
     @FXML
     private AnchorPane mainPane;
 
+    // PAUSE AND PLAY BUTTONS
     @FXML
     private ImageView pauseImage;
     @FXML
     private ImageView playImage;
 
+    // CURRENT SONG TEXT
     @FXML
     private Text currentSong;
 
@@ -72,13 +73,13 @@ public class AppController {
     }
 
     private void play(){
-        playerRef.get().resume();
         adjustButton(true);
+        playerRef.get().resume();
     }
 
     private void pause(){
-        player().pause();
         adjustButton(false);
+        player().pause();
     }
 
     public void adjustButton(boolean playing){
@@ -89,6 +90,10 @@ public class AppController {
             pauseImage.setOpacity(0);
             playImage.setOpacity(100);
         }
+    }
+
+    public void adjustVolume(double volume){
+        Platform.runLater(() -> volSlider.setValue(volume * 100));
     }
 
     @FXML

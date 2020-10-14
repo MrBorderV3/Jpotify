@@ -6,7 +6,6 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import me.border.jpotify.audio.Player;
-import me.border.jpotify.audio.youtube.YTConverter;
 import me.border.jpotify.storage.PlaylistManager;
 import me.border.jpotify.ui.controllers.AppController;
 import me.border.utilities.utils.URLUtils;

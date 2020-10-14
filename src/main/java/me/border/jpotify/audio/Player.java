@@ -2,9 +2,10 @@ package me.border.jpotify.audio;
 
 import javafx.scene.media.MediaPlayer;
 import javafx.util.Duration;
+import me.border.jpotify.audio.util.SaveStatus;
 import me.border.jpotify.audio.util.SongQueue;
 import me.border.jpotify.audio.util.Mode;
-import me.border.jpotify.file.PlaylistCacheFile;
+import me.border.jpotify.file.CacheFile;
 import me.border.jpotify.storage.PlaylistManager;
 import me.border.jpotify.ui.PlayerApp;
 import me.border.jpotify.ui.controllers.AppController;
@@ -14,9 +15,11 @@ import java.util.*;
 public class Player {
 
     private Playlist playlist;
-    private PlaylistCacheFile playlistCacheFile;
     private List<Song> songs;
     private Map<String, Integer> indexMap;
+
+    private CacheFile cacheFile;
+    private Object[] cache;
 
     private Random random = new Random();
     private Song currentSong;
@@ -25,33 +28,45 @@ public class Player {
     private boolean firstSong = true;
     private boolean playing = false;
 
+    private SaveStatus saveStatus = SaveStatus.CLOSED;
+
     // TODO - Change it so playing on shuffle just shuffles the list of songs (maybe add shuffle function to Playlist and save an oglist and a shuffledlist) GOT TO KEEP COPY OF OG ORDER
     private Mode mode;
 
     private double volume = -1;
 
     public Player(){
-        this.playlistCacheFile = new PlaylistCacheFile("pcache", PlaylistManager.dir, null);
-        this.playlistCacheFile.setup();
-        String cache = playlistCacheFile.getItem();
+        this.cacheFile = new CacheFile("cache", PlaylistManager.dir, null);
+        this.cacheFile.setup();
+        this.cache = cacheFile.getItem();
         controller().adjustButton(false);
-        if (cache != null){
-            if (cache.contains("?:?")){
-                String[] rCache = cache.split("\\?:\\?");
-                String cachedPlaylist = rCache[0];
-                String song = rCache[1];
-                Playlist playlist = PlayerApp.playlistManager.getPlaylist(cachedPlaylist);
-                setPlaylist(playlist);
-                PlayerApp.controller.focusPlaylist(playlist.getName());
-                if (playlist.hasSong(song)) {
-                    this.firstSong = false;
-                    currentSong = songs.get(indexMap.get(song));
+        if (cache != null) {
+            String playlistCache = (String) cache[0];
+            if (playlistCache != null) {
+                if (playlistCache.contains("?:?")) {
+                    String[] rCache = playlistCache.split("\\?:\\?");
+                    String cachedPlaylist = rCache[0];
+                    String song = rCache[1];
+                    Playlist playlist = PlayerApp.playlistManager.getPlaylist(cachedPlaylist);
+                    setPlaylist(playlist);
+                    PlayerApp.controller.focusPlaylist(playlist.getName());
+                    if (playlist.hasSong(song)) {
+                        this.firstSong = false;
+                        currentSong = songs.get(indexMap.get(song));
+                    }
+                } else {
+                    Playlist playlist = PlayerApp.playlistManager.getPlaylist(playlistCache);
+                    setPlaylist(playlist);
+                    PlayerApp.controller.focusPlaylist(playlist.getName());
                 }
-            } else {
-                Playlist playlist = PlayerApp.playlistManager.getPlaylist(cache);
-                setPlaylist(playlist);
-                PlayerApp.controller.focusPlaylist(playlist.getName());
             }
+            Double volumeCache = (Double) cache[1];
+            if (volumeCache != null){
+                controller().adjustVolume(volumeCache);
+                setVolume(volumeCache);
+            }
+        } else {
+            this.cache = new Object[2];
         }
     }
 
@@ -65,8 +80,9 @@ public class Player {
         if (currentSong != null && songs.contains(currentSong)){
             item = item + "?:?" + currentSong.getName();
         }
-        this.playlistCacheFile.setItem(item);
-        this.playlistCacheFile.save();
+        cache[0] = item;
+        this.cacheFile.setItem(cache);
+        this.cacheFile.save();
     }
 
     public Playlist getPlaylist(){
@@ -79,6 +95,10 @@ public class Player {
         }
 
         if (firstSong) {
+            if (songs == null){
+                controller().adjustButton(false);
+                return;
+            }
             if (songs.isEmpty()){
                 playing = false;
                 return;
@@ -194,8 +214,8 @@ public class Player {
         if (currentSong != null){
             item = item + "?:?" + currentSong.getName();
         }
-        this.playlistCacheFile.setItem(item);
-        this.playlistCacheFile.save();
+        cache[0] = item;
+        saveCache();
         mediaPlayer.setOnEndOfMedia(() -> {
             controller().resetSlider();
             switch (mode) {
@@ -217,9 +237,34 @@ public class Player {
         return volume;
     }
 
-    public void setVolume(double volume){
+    public void setVolume(double volume) {
         this.volume = volume;
-        this.currentSong.getMedia().setVolume(volume);
+        this.cache[1] = volume;
+        if (this.currentSong != null) {
+            this.currentSong.getMedia().setVolume(volume);
+        }
+        saveCache();
+    }
+
+    private void saveCache(){
+        if (saveStatus == SaveStatus.WAITING){
+            return;
+        }
+        if (saveStatus == SaveStatus.READY) {
+            this.cacheFile.setItem(cache);
+            this.cacheFile.save();
+            saveStatus = SaveStatus.CLOSED;
+        } else {
+            saveStatus = SaveStatus.WAITING;
+            new Timer().schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    saveStatus = SaveStatus.READY;
+                    cacheFile.setItem(cache);
+                    cacheFile.save();
+                }
+            }, 2000);
+        }
     }
 
     public boolean isPlaying(){
