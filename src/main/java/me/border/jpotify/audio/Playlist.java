@@ -86,7 +86,7 @@ public class Playlist {
                             System.out.println("Ignoring file " + file.getName() + " since it is not audio.");
                         }
                     }
-                }, 500L);
+                }, 1500L);
             }
 
             @Override

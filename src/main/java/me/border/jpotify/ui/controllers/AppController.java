@@ -4,7 +4,9 @@ import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.Cursor;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.Slider;
+import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
@@ -13,10 +15,15 @@ import javafx.scene.text.Text;
 import me.border.jpotify.audio.util.AudioController;
 import me.border.jpotify.audio.Player;
 import me.border.jpotify.audio.Playlist;
+import me.border.jpotify.audio.util.YTConverter;
+import me.border.jpotify.util.ui.AlertBox;
+import me.border.utilities.utils.Response;
 
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class AppController {
@@ -52,6 +59,12 @@ public class AppController {
     // CURRENT SONG TEXT
     @FXML
     private Text currentSong;
+
+    // Youtube link text field
+    @FXML
+    private TextField youtubeLink;
+    @FXML
+    private Button searchButton;
 
     public void initTimeListener(){
         AudioController audioController = player().getCurrentSong().getController();
@@ -121,6 +134,37 @@ public class AppController {
     }
 
     @FXML
+    private void search(){
+        if (searchButton.isDisabled())
+            return;
+
+        String link = youtubeLink.getText();
+        if (player().getPlaylist() == null){
+            AlertBox.showAlert("Please choose a playlist first.", "Error");
+        }
+        if (link.isEmpty()){
+            AlertBox.showAlert("Invalid Link", "Invalid Link");
+        } else {
+            searchButton.setDisable(true);
+            searchButton.setText("Searching...");
+            CompletableFuture<Response<Integer>> future = YTConverter.addSong(link, player().getPlaylist());
+            future.whenComplete((b, throwable) -> {
+                if (b.getAnswer()) {
+                    Platform.runLater(() -> AlertBox.showAlert("Successfully downloaded requested song", "Success"));
+                } else {
+                    if (b.getContext() == 1) {
+                        Platform.runLater(() -> AlertBox.showAlert("An error has occurred and the requested song wasn't found, please double check the search query to make sure it is valid.", "Failure"));
+                    }
+               }
+                Platform.runLater(() -> {
+                    searchButton.setText("Search");
+                    searchButton.setDisable(false);
+                });
+            });
+        }
+    }
+
+    @FXML
     public void focus(){
         mainPane.requestFocus();
     }
@@ -145,12 +189,13 @@ public class AppController {
     }
 
     public void focusPlaylist(String name){
-        if (toggledPlaylist.get() != null){
-            toggledPlaylist.get().setSelected(false);
+        ToggleButton toggledPlaylist = this.toggledPlaylist.get();
+        if (toggledPlaylist != null){
+            toggledPlaylist.setSelected(false);
         }
         ToggleButton playlist = playlistMap.get(name);
         playlist.setSelected(true);
-        toggledPlaylist.set(playlist);
+        this.toggledPlaylist.set(playlist);
     }
 
     public void initPlaylists(Collection<Playlist> playlists){
@@ -162,12 +207,18 @@ public class AppController {
                 MouseButton button = e.getButton();
                 if (button == MouseButton.SECONDARY){
                     // OPEN A MENU WITH OPTIONS LIKE : DELETE, COPY,
+                    return;
                 }
-                if (toggledPlaylist.get() != null){
-                    toggledPlaylist.get().setSelected(false);
+                ToggleButton toggledPlaylist = this.toggledPlaylist.get();
+                if (toggledPlaylist != null){
+                    if (toggledPlaylist.equals(toggleButton)){
+                        toggledPlaylist.setSelected(true);
+                        return;
+                    }
+                    toggledPlaylist.setSelected(false);
                 }
                 player().setPlaylist(playlist);
-                toggledPlaylist.set(toggleButton);
+                this.toggledPlaylist.set(toggleButton);
             });
             AnchorPane.setTopAnchor(toggleButton, value);
             playlistPane.getChildren().add(toggleButton);

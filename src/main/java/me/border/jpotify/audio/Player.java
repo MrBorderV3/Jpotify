@@ -10,24 +10,25 @@ import me.border.jpotify.storage.PlaylistManager;
 import me.border.jpotify.ui.PlayerApp;
 import me.border.jpotify.ui.controllers.AppController;
 
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 public class Player {
+
+    private static final Charset FORMAT = StandardCharsets.UTF_8;
+    private PlaylistManager playlistManager;
 
     private Playlist playlist;
     private List<Song> songs;
     private Map<String, Integer> indexMap;
 
-    private CacheFile cacheFile;
-    private Object[] cache;
-
     private Random random = new Random();
-    private Song currentSong;
     private SongQueue songQueue = new SongQueue();
+    private Song currentSong;
 
-    private boolean firstSong = true;
-    private boolean playing = false;
-
+    private CacheFile cacheFile = new CacheFile("cache", PlaylistManager.dir, null);
+    private Object[] cache;
     private SaveStatus saveStatus = SaveStatus.CLOSED;
 
     // TODO - Change it so playing on shuffle just shuffles the list of songs (maybe add shuffle function to Playlist and save an oglist and a shuffledlist) GOT TO KEEP COPY OF OG ORDER
@@ -35,27 +36,31 @@ public class Player {
 
     private double volume = -1;
 
+    private boolean firstSong = true;
+    private boolean playing = false;
+
     public Player(){
-        this.cacheFile = new CacheFile("cache", PlaylistManager.dir, null);
         this.cacheFile.setup();
         this.cache = cacheFile.getItem();
         controller().adjustButton(false);
+        this.playlistManager = PlaylistManager.getInstance();
         if (cache != null) {
             String playlistCache = (String) cache[0];
             if (playlistCache != null) {
                 if (playlistCache.contains("?:?")) {
-                    String[] rCache = playlistCache.split("\\?:\\?");
-                    String cachedPlaylist = rCache[0];
-                    String song = rCache[1];
-                    Playlist playlist = PlayerApp.playlistManager.getPlaylist(cachedPlaylist);
-                    setPlaylist(playlist);
+                    String[] stringCache = playlistCache.split("\\?:\\?");
+                    String cachedPlaylist = stringCache[0];
+                    String song = stringCache[1];
+                    Playlist playlist = playlistManager.getPlaylist(cachedPlaylist);
+                    lazySetPlaylist(playlist);
                     PlayerApp.controller.focusPlaylist(playlist.getName());
                     if (playlist.hasSong(song)) {
                         this.firstSong = false;
                         currentSong = songs.get(indexMap.get(song));
+                        controller().changeText(currentSong.getName());
                     }
                 } else {
-                    Playlist playlist = PlayerApp.playlistManager.getPlaylist(playlistCache);
+                    Playlist playlist = playlistManager.getPlaylist(playlistCache);
                     setPlaylist(playlist);
                     PlayerApp.controller.focusPlaylist(playlist.getName());
                 }
@@ -70,10 +75,14 @@ public class Player {
         }
     }
 
-    public void setPlaylist(Playlist playlist) {
+    private void lazySetPlaylist(Playlist playlist){
         this.playlist = playlist;
         this.songs = playlist.getSongs();
         this.indexMap = playlist.getIndexMap();
+    }
+
+    public void setPlaylist(Playlist playlist) {
+        lazySetPlaylist(playlist);
         songQueue.clear();
         firstSong = true;
         String item = playlist.getName();

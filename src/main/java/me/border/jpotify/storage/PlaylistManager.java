@@ -13,10 +13,16 @@ public class PlaylistManager {
 
     private Map<String, Playlist> playlists = new HashMap<>();
 
-    public PlaylistManager(){
+    private PlaylistManager(){
         if (!dir.exists())
             dir.mkdirs();
         loadPlaylists();
+    }
+
+    private static PlaylistManager instance = new PlaylistManager();
+
+    public static PlaylistManager getInstance(){
+        return instance;
     }
 
     private void loadPlaylists(){
