@@ -10,13 +10,10 @@ import me.border.jpotify.storage.PlaylistManager;
 import me.border.jpotify.ui.PlayerApp;
 import me.border.jpotify.ui.controllers.AppController;
 
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 public class Player {
 
-    private static final Charset FORMAT = StandardCharsets.UTF_8;
     private PlaylistManager playlistManager;
 
     private Playlist playlist;
@@ -31,6 +28,7 @@ public class Player {
     private Object[] cache;
     private SaveStatus saveStatus = SaveStatus.CLOSED;
 
+    // TODO - Make it so shuffle doesn't play similar songs one after the other (By saving indices on the files)
     // TODO - Change it so playing on shuffle just shuffles the list of songs (maybe add shuffle function to Playlist and save an oglist and a shuffledlist) GOT TO KEEP COPY OF OG ORDER
     private Mode mode;
 
