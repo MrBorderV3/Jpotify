@@ -1,5 +1,6 @@
 package me.border.jpotify.audio;
 
+import me.border.jpotify.ui.PlayerApp;
 import me.border.jpotify.util.Utils;
 import me.border.utilities.file.watcher.FileEvent;
 import me.border.utilities.file.watcher.FileListener;
@@ -12,6 +13,8 @@ public class Playlist {
 
     private List<Song> songs = new ArrayList<>();
     private Map<String, Integer> indexMap = new HashMap<>();
+
+    private FileWatcher watcher;
 
     private String name;
     private File dir;
@@ -47,6 +50,19 @@ public class Playlist {
         }
     }
 
+    public void delete() {
+        if (PlayerApp.player.getPlaylist() == this) {
+            PlayerApp.player.clearPlaylist();
+        }
+
+        watcher.stop();
+        for (Song song : songs){
+            song.getMedia().dispose();
+            song.getDir().delete();
+        }
+        getDir().delete();
+    }
+
     public boolean hasSong(String song){
         return indexMap.containsKey(song);
     }
@@ -68,7 +84,7 @@ public class Playlist {
     }
 
     private void initWatchService(){
-        FileWatcher watcher = new FileWatcher(dir);
+        this.watcher = new FileWatcher(dir);
         watcher.addListener(new FileListener() {
             @Override
             public void onCreated(FileEvent event) {

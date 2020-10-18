@@ -40,13 +40,17 @@ public class PlaylistManager {
         return playlists.get(name);
     }
 
+    public boolean contains(String name){
+        return playlists.containsKey(name);
+    }
+
     public Collection<Playlist> getPlaylists(){
         return playlists.values();
     }
 
-    public void createPlaylist(String name) {
+    public Playlist createPlaylist(String name) {
         if (playlists.containsKey(name)){
-            return;
+            return null;
         }
         File playlistDir = new File(dir + File.separator + name);
         if (!playlistDir.exists()){
@@ -55,9 +59,11 @@ public class PlaylistManager {
 
         Playlist playlist = new Playlist(playlistDir);
         playlists.put(name, playlist);
+        return playlist;
     }
 
     public void removePlaylist(Playlist playlist){
         playlists.remove(playlist.getName());
+        playlist.delete();
     }
 }

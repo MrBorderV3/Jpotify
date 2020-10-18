@@ -92,6 +92,23 @@ public class Player {
         this.cacheFile.save();
     }
 
+    public void clearPlaylist(){
+        if (isPlaying()) {
+            pause();
+            controller().adjustButton(false);
+        }
+        controller().changeText("");
+        currentSong = null;
+        this.playlist = null;
+        this.songs = null;
+        this.indexMap = null;
+        songQueue.clear();
+        firstSong = true;
+        cache[0] = null;
+        this.cacheFile.setItem(cache);
+        this.cacheFile.save();
+    }
+
     public Playlist getPlaylist(){
         return playlist;
     }

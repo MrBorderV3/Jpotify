@@ -11,7 +11,7 @@ import com.google.api.services.youtube.YouTube;
 import com.google.api.services.youtube.model.SearchListResponse;
 import com.google.api.services.youtube.model.SearchResult;
 import me.border.jpotify.audio.Playlist;
-import me.border.jpotify.util.ui.ConfirmBox;
+import me.border.utilities.ui.javafx.fxml.ConfirmBox;
 import me.border.utilities.utils.AsyncScheduler;
 import me.border.utilities.utils.ImmuteableResponse;
 import me.border.utilities.utils.Response;
