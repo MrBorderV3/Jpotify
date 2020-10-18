@@ -142,34 +142,38 @@ public class AppController {
     }
 
     @FXML
-    private void search(){
+    private void search() {
         if (searchButton.isDisabled())
             return;
 
         String link = youtubeLink.getText();
-        if (player().getPlaylist() == null){
+        if (player().getPlaylist() == null) {
             AlertBox.showAlert("Please choose a playlist first.", "Error");
+            return;
         }
-        if (link.isEmpty()){
+
+        if (link.isEmpty()) {
             AlertBox.showAlert("Invalid Link", "Invalid Link");
-        } else {
-            searchButton.setDisable(true);
-            searchButton.setText("Searching...");
-            CompletableFuture<Response<Integer>> future = YTConverter.addSong(link, player().getPlaylist());
-            future.whenComplete((b, throwable) -> {
-                if (b.getAnswer()) {
-                    Platform.runLater(() -> AlertBox.showAlert("Successfully downloaded requested song", "Success"));
-                } else {
-                    if (b.getContext() == 1) {
-                        Platform.runLater(() -> AlertBox.showAlert("An error has occurred and the requested song wasn't found, please double check the search query to make sure it is valid.", "Failure"));
-                    }
-               }
-                Platform.runLater(() -> {
-                    searchButton.setText("Search");
-                    searchButton.setDisable(false);
-                });
-            });
+            return;
         }
+
+        searchButton.setDisable(true);
+        searchButton.setText("Searching...");
+
+        CompletableFuture<Response<Integer>> future = YTConverter.getInstance().addSong(link, player().getPlaylist());
+        future.whenComplete((b, throwable) -> {
+            if (b.getAnswer()) {
+                Platform.runLater(() -> AlertBox.showAlert("Successfully downloaded requested song", "Success"));
+            } else {
+                if (b.getContext() == 1) {
+                    Platform.runLater(() -> AlertBox.showAlert("An error has occurred and the requested song wasn't found, please double check the search query to make sure it is valid.", "Failure"));
+                }
+            }
+            Platform.runLater(() -> {
+                searchButton.setText("Search");
+                searchButton.setDisable(false);
+            });
+        });
     }
 
     @FXML
@@ -312,7 +316,7 @@ public class AppController {
             }
             Playlist playlist = createPlaylist(name);
             if (playlist != null){
-                AsyncScheduler.runTaskAsync(() -> {
+                AsyncScheduler.runTaskAsyncDaemon(() -> {
                     for (Song song : copy.getSongs()) {
                         try {
                             File songDir = song.getDir();
