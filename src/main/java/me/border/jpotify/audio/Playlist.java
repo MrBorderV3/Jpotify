@@ -57,8 +57,7 @@ public class Playlist {
 
         watcher.stop();
         for (Song song : songs){
-            song.getMedia().dispose();
-            song.getDir().delete();
+            song.delete();
         }
         getDir().delete();
     }

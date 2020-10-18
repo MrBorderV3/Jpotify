@@ -194,7 +194,7 @@ public class Player {
         if (!playing)
             return;
         playing = false;
-        currentSong.getMedia().pause();
+        currentSong.pause();
     }
 
     public void resume(){
@@ -205,7 +205,7 @@ public class Player {
         } else {
             playing = true;
             controller().changeText(currentSong.getName());
-            currentSong.getMedia().play();
+            currentSong.play();
         }
     }
 
@@ -265,7 +265,7 @@ public class Player {
         this.volume = volume;
         this.cache[1] = volume;
         if (this.currentSong != null) {
-            this.currentSong.getMedia().setVolume(volume);
+            this.currentSong.setVolume(volume);
         }
         saveCache();
     }

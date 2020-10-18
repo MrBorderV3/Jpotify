@@ -33,6 +33,23 @@ public class Song {
         return controller;
     }
 
+    public void play(){
+        media.play();
+    }
+
+    public void pause(){
+        media.pause();
+    }
+
+    public void setVolume(double volume){
+        media.setVolume(volume);
+    }
+
+    public void delete(){
+        media.dispose();
+        dir.delete();
+    }
+
     public MediaPlayer getMedia(){
         return media;
     }
