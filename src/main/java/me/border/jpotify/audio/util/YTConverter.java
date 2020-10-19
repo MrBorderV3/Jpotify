@@ -13,9 +13,11 @@ import me.border.utilities.utils.AsyncScheduler;
 import me.border.utilities.utils.ImmuteableResponse;
 import me.border.utilities.utils.Response;
 
+import java.io.File;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -31,11 +33,12 @@ public class YTConverter extends YoutubeConnection {
         YouTube youtubeService = getService();
         YouTube.Search.List request = youtubeService.search().list("snippet");
         SearchListResponse response = request.setMaxResults(1L).setKey(API_KEY).setQ(name).setType("video").setOrder("relevance").execute();
-        String[] info = new String[2];
+        String[] info = new String[3];
         try {
             SearchResult item = response.getItems().get(0);
             info[0] = item.getSnippet().getTitle();
             info[1] = item.getId().getVideoId();
+            info[2] = item.getSnippet().getChannelTitle();
             return info;
         } catch (IndexOutOfBoundsException e) {
             return null;
@@ -45,6 +48,7 @@ public class YTConverter extends YoutubeConnection {
     public CompletableFuture<Response<Integer>> addSong(String search, Playlist playlist) {
         CompletableFuture<Response<Integer>> future = new CompletableFuture<>();
         String id = "";
+        AtomicReference<String> author = new AtomicReference<>();
         if (!search.startsWith("https:") && !search.startsWith("http:")) {
             try {
                 String[] info = getIDByName(search);
@@ -58,6 +62,7 @@ public class YTConverter extends YoutubeConnection {
                     return future;
                 }
                 id = info[1];
+                author.set(info[2]);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -70,7 +75,9 @@ public class YTConverter extends YoutubeConnection {
             try {
                 YoutubeDownloader downloader = new YoutubeDownloader();
                 YoutubeVideo video = downloader.getVideo(finalId);
-                video.download(video.audioFormats().get(0), playlist.getDir());
+                author.set(video.details().author());
+                File createdFile = video.download(video.audioFormats().get(0), playlist.getDir());
+                playlist.getIndices().put(createdFile, author.get());
                 future.complete(new ImmuteableResponse<>(true, 1));
             } catch (YoutubeException | IOException e) {
                 future.complete(new ImmuteableResponse<>(false, 1));

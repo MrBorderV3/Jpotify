@@ -54,6 +54,11 @@
 
     <dependencies>
         <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.6</version>
+        </dependency>
+        <dependency>
             <groupId>me.border</groupId>
             <artifactId>Utilities</artifactId>
             <version>1.0</version>
