@@ -4,14 +4,17 @@ import me.border.jpotify.audio.util.Indices;
 import me.border.jpotify.file.IndexFile;
 import me.border.jpotify.ui.PlayerApp;
 import me.border.jpotify.util.Utils;
+import me.border.utilities.file.watcher.FileAdapter;
 import me.border.utilities.file.watcher.FileEvent;
-import me.border.utilities.file.watcher.FileListener;
 import me.border.utilities.file.watcher.FileWatcher;
+import me.border.utilities.utils.AsyncScheduler;
 
 import java.io.File;
 import java.util.*;
 
 public class Playlist {
+
+    private List<Song> shuffleList = new LinkedList<>();
 
     private List<Song> songs = new ArrayList<>();
     private Map<String, Integer> indexMap = new HashMap<>();
@@ -42,11 +45,11 @@ public class Playlist {
                 indices.put(song);
                 this.index++;
             } else {
-                System.out.println("Ignoring file " + file.getName() + " since it is not audio.");
+                if (!file.getName().equals("indices.dat"))
+                    System.out.println("Ignoring file " + file.getName() + " since it is not audio.");
             }
         }
         initWatchService();
-
     }
 
     public String getInfo(String song){
@@ -77,11 +80,27 @@ public class Playlist {
         }
 
         watcher.stop();
-        for (Song song : songs){
+        for (Song song : songs) {
             song.delete();
         }
         getIndices().delete();
         getDir().delete();
+    }
+
+    public void shuffle(boolean immediate){
+        if (immediate){
+            shuffleList.clear();
+            shuffleList.addAll(songs);
+            Collections.shuffle(shuffleList);
+        } else {
+            AsyncScheduler.runTaskAsyncDaemon(() -> {
+                if (shuffleList.isEmpty())
+                    return;
+                shuffleList.clear();
+                shuffleList.addAll(songs);
+                Collections.shuffle(shuffleList);
+            });
+        }
     }
 
     public boolean hasSong(String song){
@@ -100,13 +119,19 @@ public class Playlist {
         return songs;
     }
 
+    public List<Song> getShuffledSongs(){
+        if (shuffleList.isEmpty())
+            shuffle(true);
+        return shuffleList;
+    }
+
     public File getDir(){
         return dir;
     }
 
     private void initWatchService(){
         this.watcher = new FileWatcher(dir);
-        watcher.addListener(new FileListener() {
+        watcher.addListener(new FileAdapter() {
             @Override
             public void onCreated(FileEvent event) {
                 Timer timer = new Timer();
@@ -122,15 +147,13 @@ public class Playlist {
                             if (indices.hasIndex(file)){
                                 indices.put(song);
                             }
+                            shuffle(false);
                         } else {
                             System.out.println("Ignoring file " + file.getName() + " since it is not audio.");
                         }
                     }
                 }, 1500L);
             }
-
-            @Override
-            public void onModified(FileEvent event) { }
 
             @Override
             public void onDeleted(FileEvent event) {
@@ -141,6 +164,7 @@ public class Playlist {
                     Song song = songs.remove(index);
                     refreshPlaylistIndex();
                     indices.remove(song);
+                    shuffle(false);
                 } else {
                     System.out.println("Ignoring file " + file.getName() + " since it is not audio.");
                 }

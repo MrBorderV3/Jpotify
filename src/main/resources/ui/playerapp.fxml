@@ -10,42 +10,52 @@
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.text.Text?>
 
-<AnchorPane fx:id="mainPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" onMouseClicked="#focus" prefHeight="800.0" prefWidth="1280.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="me.border.jpotify.ui.controllers.AppController">
+<AnchorPane fx:id="mainPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" onKeyPressed="#ppkButton" onMouseClicked="#focus" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="me.border.jpotify.ui.controllers.AppController">
    <children>
-      <ImageView fx:id="playImage" fitHeight="50.0" fitWidth="50.0" layoutX="615.0" layoutY="716.0" onMouseClicked="#ppButton" onMouseEntered="#clickable" onMouseExited="#unclickable" pickOnBounds="true" preserveRatio="true">
+      <ImageView fx:id="playImage" fitHeight="50.0" fitWidth="50.0" layoutX="330.0" layoutY="325.0" onMouseClicked="#ppButton" onMouseEntered="#clickable" onMouseExited="#unclickable" pickOnBounds="true" preserveRatio="true">
          <image>
             <Image url="@../assets/play.png" />
          </image>
       </ImageView>
-      <ImageView fx:id="pauseImage" fitHeight="50.0" fitWidth="50.0" layoutX="616.0" layoutY="716.0" onMouseClicked="#ppButton" onMouseEntered="#clickable" onMouseExited="#unclickable" pickOnBounds="true" preserveRatio="true">
+      <ImageView fx:id="pauseImage" fitHeight="50.0" fitWidth="50.0" layoutX="330.0" layoutY="325.0" onMouseClicked="#ppButton" onMouseEntered="#clickable" onMouseExited="#unclickable" pickOnBounds="true" preserveRatio="true">
          <image>
             <Image url="@../assets/pause.png" />
          </image>
       </ImageView>
-      <Slider fx:id="volSlider" layoutX="1252.0" layoutY="646.0" orientation="VERTICAL" />
-  <AnchorPane fx:id="playlistPane" minHeight="0.0" minWidth="0.0" prefHeight="800.0" prefWidth="125.0" />
-      <Line endX="-100.0" endY="650.0" layoutX="225.0" layoutY="153.0" startX="-100.0" startY="-157.0" />
-      <Slider fx:id="timeSlider" layoutX="555.0" layoutY="778.0" prefHeight="17.0" prefWidth="171.0" />
-      <ImageView fitHeight="50.0" fitWidth="90.0" layoutX="701.0" layoutY="716.0" onMouseClicked="#next" onMouseEntered="#clickable" onMouseExited="#unclickable" pickOnBounds="true" preserveRatio="true">
+      <Slider fx:id="volSlider" layoutX="563.0" layoutY="238.0" orientation="VERTICAL" />
+  <AnchorPane fx:id="playlistPane" minHeight="0.0" minWidth="0.0" prefHeight="400.0" prefWidth="125.0" />
+      <Line endX="-100.0" endY="247.0" layoutX="225.0" layoutY="153.0" startX="-100.0" startY="-157.0" />
+      <Slider fx:id="timeSlider" layoutX="268.0" layoutY="378.0" prefHeight="17.0" prefWidth="171.0" />
+      <ImageView fitHeight="50.0" fitWidth="90.0" layoutX="390.0" layoutY="325.0" onMouseClicked="#next" onMouseEntered="#clickable" onMouseExited="#unclickable" pickOnBounds="true" preserveRatio="true">
          <image>
             <Image url="@../assets/next.png" />
          </image>
       </ImageView>
-      <ImageView fitHeight="50.0" fitWidth="50.0" layoutX="530.0" layoutY="716.0" onMouseClicked="#prev" onMouseEntered="#clickable" onMouseExited="#unclickable" pickOnBounds="true" preserveRatio="true">
+      <ImageView fitHeight="50.0" fitWidth="50.0" layoutX="270.0" layoutY="325.0" onMouseClicked="#prev" onMouseEntered="#clickable" onMouseExited="#unclickable" pickOnBounds="true" preserveRatio="true">
          <image>
             <Image url="@../assets/prev.png" />
          </image>
       </ImageView>
-      <Text fx:id="currentSong" layoutX="530.0" layoutY="660.0" strokeType="OUTSIDE" strokeWidth="0.0" textAlignment="CENTER" wrappingWidth="228.0">
+      <Text fx:id="currentSong" layoutX="240.0" layoutY="278.0" strokeType="OUTSIDE" strokeWidth="0.0" textAlignment="CENTER" wrappingWidth="228.0">
          <font>
             <Font name="Garamond Italic" size="16.0" />
          </font>
       </Text>
-      <TextField fx:id="youtubeLink" layoutX="153.0" layoutY="14.0" promptText="YouTube Link">
+      <TextField fx:id="youtubeLink" layoutX="153.0" layoutY="14.0" onKeyPressed="#searchKey" promptText="Search Youtube">
          <font>
             <Font name="Garamond" size="14.0" />
          </font>
       </TextField>
-      <Button fx:id="searchButton" layoutX="327.0" layoutY="15.0" mnemonicParsing="false" onAction="#search" text="Search" />
+      <Button fx:id="searchButton" layoutX="329.0" layoutY="15.0" mnemonicParsing="false" onAction="#search" text="Search" />
+      <ImageView fx:id="shuffleImage" fitHeight="50.0" fitWidth="50.0" layoutX="200.0" layoutY="325.0" onMouseClicked="#shuffle" onMouseEntered="#clickable" onMouseExited="#unclickable" pickOnBounds="true" preserveRatio="true">
+         <image>
+            <Image url="@../assets/shuffle.png" />
+         </image>
+      </ImageView>
+      <ImageView fx:id="starImage" fitHeight="18.0" fitWidth="21.0" layoutX="216.0" layoutY="370.0" pickOnBounds="true" preserveRatio="true">
+         <image>
+            <Image url="@../assets/star.png" />
+         </image>
+      </ImageView>
    </children>
 </AnchorPane>

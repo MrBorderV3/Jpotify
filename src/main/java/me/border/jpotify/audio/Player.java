@@ -41,6 +41,7 @@ public class Player {
         this.cacheFile.setup();
         this.cache = cacheFile.getItem();
         controller().adjustButton(false);
+        controller().adjustShuffle(false);
         this.playlistManager = PlaylistManager.getInstance();
         if (cache != null) {
             String playlistCache = (String) cache[0];
@@ -74,8 +75,13 @@ public class Player {
     }
 
     private void lazySetPlaylist(Playlist playlist){
+        if (mode == Mode.SHUFFLE){
+            this.songs = playlist.getShuffledSongs();
+        } else {
+            this.songs = playlist.getSongs();
+        }
+
         this.playlist = playlist;
-        this.songs = playlist.getSongs();
         this.indexMap = playlist.getIndexMap();
     }
 
@@ -113,10 +119,8 @@ public class Player {
         return playlist;
     }
 
-    public void playNormal(){
-        if (this.mode != Mode.NORMAL){
-            this.mode = Mode.NORMAL;
-        }
+    public void startup(){
+        normalPlay();
 
         if (firstSong) {
             if (songs == null){
@@ -134,16 +138,20 @@ public class Player {
         }
     }
 
+    public void normalPlay(){
+        if (this.mode != Mode.NORMAL){
+            this.songs = playlist.getSongs();
+            this.mode = Mode.NORMAL;
+        }
+    }
+
     public void shufflePlay(){
         if (this.mode != Mode.SHUFFLE) {
             this.mode = Mode.SHUFFLE;
         }
 
-        Song randomSong = songs.get(random.nextInt(songs.size()));
-        while (randomSong == currentSong){
-            randomSong = songs.get(random.nextInt(songs.size()));;
-        }
-        playSong(randomSong, false);
+        playlist.shuffle(true);
+        this.songs = playlist.getShuffledSongs();
     }
 
     // Function to play a song that is clicked
@@ -201,7 +209,7 @@ public class Player {
         if (playing)
             return;
         if (firstSong){
-            playNormal();
+            startup();
         } else {
             playing = true;
             controller().changeText(currentSong.getName());
@@ -247,7 +255,7 @@ public class Player {
                     shufflePlay();
                     break;
                 case NORMAL:
-                    playNormal();
+                    startup();
                     break;
             }
         });

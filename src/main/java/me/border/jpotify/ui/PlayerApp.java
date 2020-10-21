@@ -6,6 +6,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 import me.border.jpotify.audio.Player;
 import me.border.jpotify.storage.PlaylistManager;
 import me.border.jpotify.ui.controllers.AppController;
@@ -27,7 +28,7 @@ public class PlayerApp extends Application {
 
         FXMLLoader loader = new FXMLLoader(URLUtils.getURL("/ui/playerapp.fxml"));
         Parent root = loader.load();
-        stage.setScene(new Scene(root, 1280, 800));
+        stage.setScene(new Scene(root, 600, 400));
 
         controller = loader.getController();
         controller.initSliders();
@@ -38,5 +39,7 @@ public class PlayerApp extends Application {
 
         stage.show();
         controller.focus();
+
+        stage.setOnCloseRequest(e -> System.exit(0));
     }
 }

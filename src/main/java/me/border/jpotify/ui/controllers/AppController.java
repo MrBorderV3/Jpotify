@@ -9,6 +9,8 @@ import javafx.scene.control.Button;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextField;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.text.Text;
@@ -40,6 +42,8 @@ public class AppController {
 
     private MuteableWeakReference<Playlist> clipboard = new MuteableWeakReference<>();
 
+    private StrongReference<Boolean> shuffle = new StrongReference<>(false);
+
     public void initController(Player player){
         playerRef.set(player);
     }
@@ -64,6 +68,11 @@ public class AppController {
     @FXML
     private ImageView playImage;
 
+    @FXML
+    private ImageView shuffleImage;
+    @FXML
+    private ImageView starImage;
+
     // CURRENT SONG TEXT
     @FXML
     private Text currentSong;
@@ -77,6 +86,13 @@ public class AppController {
     public void initTimeListener(){
         AudioController audioController = player().getCurrentSong().getController();
         audioController.init(timeSlider);
+    }
+
+    @FXML
+    private void ppkButton(KeyEvent e){
+        if (e.getCode() == KeyCode.SPACE){
+            ppButton();
+        }
     }
 
     @FXML
@@ -106,10 +122,18 @@ public class AppController {
     public void adjustButton(boolean playing){
         if (playing){
             playImage.setOpacity(0);
-            pauseImage.setOpacity(100);
+            pauseImage.setOpacity(1);
         } else {
             pauseImage.setOpacity(0);
-            playImage.setOpacity(100);
+            playImage.setOpacity(1);
+        }
+    }
+
+    public void adjustShuffle(boolean shuffled){
+        if (shuffled){
+            starImage.setOpacity(1);
+        } else {
+            starImage.setOpacity(0);
         }
     }
 
@@ -127,6 +151,19 @@ public class AppController {
     private void next(){
         adjustButton(true);
         player().playNext();
+    }
+
+    @FXML
+    private void shuffle(){
+        if (shuffle.get()){
+            adjustShuffle(false);
+            shuffle.set(false);
+            player().normalPlay();
+        } else {
+            adjustShuffle(true);
+            shuffle.set(true);
+            player().shufflePlay();
+        }
     }
 
     @FXML
@@ -174,6 +211,13 @@ public class AppController {
                 searchButton.setDisable(false);
             });
         });
+    }
+
+    @FXML
+    public void searchKey(KeyEvent e){
+        if (e.getCode().equals(KeyCode.ENTER)){
+            search();
+        }
     }
 
     @FXML
